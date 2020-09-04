@@ -1,0 +1,163 @@
+#!/usr/bin/env php
+
+<?php
+require_once('vendor/autoload.php');
+
+
+use Ninjiwi\Util\sanitize;
+use Ninjiwi\Util\ContentParser;
+use League\BooBoo\Formatter\CommandLineFormatter;
+use League\BooBoo\BooBoo;
+use League\CLImate\CLImate;
+use League\CommonMark\CommonMarkConverter;
+use League\Flysystem\Adapter\Local;
+use League\Flysystem\Filesystem;
+use League\Plates\Engine;
+
+/**
+ * Bootstrap
+ */
+$time_start = microtime(true);
+$booBoo = new BooBoo([new CommandLineFormatter()]);
+$booBoo->register();
+$cli = new CLImate();
+$progress = $cli->progress()->total(100);
+$markConverter = new CommonMarkConverter();
+$fsContent = new Filesystem(new Local(__DIR__ . '/../content'));
+$fsPublic = new Filesystem(new Local(__DIR__ . '/../public'));
+$fsStatic = new Filesystem(new Local(__DIR__ . '/../static'));
+$templates = new Engine(__DIR__ . '/../templates');
+
+$cli->shout('Start of the construction');
+
+
+/**
+ * Clean Public folder
+ */
+$progress->advance(15, 'Clean Public folder');
+$oldContents = $fsPublic->listContents('', true);
+
+foreach ($oldContents as $oc) {
+    if ($fsPublic->has($oc['path'])) {
+        $fsPublic->delete($oc['path']);
+    }
+}
+
+/**
+ * Move Static files
+ */
+$progress->advance(10, 'Move Static files');
+$contents = $fsStatic->listContents('', true);
+foreach ($contents as $content) {
+    if ($content['type'] === 'file') {
+        $contentFile = $fsStatic->read($content['path']);
+        if ($content['extension'] === 'css') {
+            $contentFile = Sanitize::css($contentFile);
+        }
+        $fsPublic->put($content['path'], $contentFile);
+    }
+}
+
+/**
+ * Generate files html
+ */
+$progress->advance(25, 'Generate posts');
+$contents = $fsContent->listContents('', true);
+$categoriesPages = [];
+foreach ($contents as $content) {
+    if ($content['extension'] === 'md') {
+        $pathHtml = $content['dirname'] . '/' . $content['filename'] . '.html';
+        $cf = new ContentParser($fsContent->read($content['path']));
+        $convertContent = $markConverter->convertToHtml($cf->content);
+        $contentHtml = $templates->render($content['dirname'], ['content' => $convertContent, 'title' => $cf->config['title']]);
+        if ($cf->config['draft'] === false) {
+            $resumePage = [
+                'title' => $cf->config['title'],
+                'date' => $cf->config['date'],
+                'path' => $pathHtml,
+                'more' => $cf->more
+            ];
+
+            if ($content['dirname'] === 'posts') {
+                $categoriesPages['articles'][] = $resumePage;
+                foreach ($cf->config['categories'] as $category) {
+                    $categoriesPages[$category][] = $resumePage;
+                }
+            }
+
+            $fsPublic->put($pathHtml, Sanitize::html($contentHtml));
+        }
+    }
+}
+
+/**
+ * Generate pages
+ */
+$progress->advance(25, 'Generate pages');
+foreach ($categoriesPages as $category => $pages) {
+    $paginated = array_chunk($pages, 10);
+    $nbPage = count($paginated);
+    foreach ($paginated as $k => $list) {
+        $title = $category . ' Page ' . ($k + 1);
+        $file = strtolower($category) . '-page-' . ($k + 1) . '.html';
+        $prev = strtolower($category) . '-page-' . ($k) . '.html';
+        $next = strtolower($category) . '-page-' . ($k + 2) . '.html';
+        $hasPrev = true;
+        $hasNext = true;
+
+        if ($k === 0 && $category !== 'articles') {
+            $title = $category;
+            $file = strtolower($category) . '.html';
+            $hasPrev = false;
+        }
+
+        if ($k === 0 && $category === 'articles') {
+            $file = 'index.html';
+            $hasPrev = false;
+        }
+
+
+        if ($nbPage === ($k + 1)) {
+            $hasNext = false;
+        }
+
+        $contentHtml = $templates->render('list', [
+            'pages' => $list,
+            'title' => $title,
+            'maxPage' => $nbPage,
+            'pageNumber' => ($k + 1),
+            'prev' => $prev,
+            'next' => $next,
+            'hasPrev' => $hasPrev,
+            'hasNext' => $hasNext,
+        ]);
+        $fsPublic->put($file, Sanitize::html($contentHtml));
+    }
+}
+
+/**
+ * Generate Sitemap
+ */
+$progress->advance(25, 'Generate sitemap');
+$dom = new \DOMDocument();
+$dom->encoding = 'utf-8';
+$dom->xmlVersion = '1.0';
+$dom->formatOutput = true;
+$xml_file_name = 'sitemap.xml';
+$root = $dom->createElement('urlset');
+foreach ($categoriesPages['articles'] as $article) {
+    $urlNode = $dom->createElement('url');
+    $urlNode->appendChild($dom->createElement('loc', $article['path']));
+    $urlNode->appendChild($dom->createElement('lastmod', $article['date']));
+    $urlNode->appendChild($dom->createElement('priority', '1.00'));
+    $root->appendChild($urlNode);
+}
+$dom->appendChild($root);
+$fsPublic->put($xml_file_name, $dom->saveXML());
+
+/**
+ * Finish
+ */
+$time_end = microtime(true);
+$execution_time = round(($time_end - $time_start), 2);
+$progress->advance(0, 'Finish in ' . $execution_time . ' s');

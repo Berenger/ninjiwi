@@ -1,0 +1,28 @@
+{
+  "name": "berenger/ninjiwi",
+  "description": "Ninjiwi is a static site generator written in PHP. It converts Markdown files into a static HTML pages.",
+  "minimum-stability": "stable",
+  "license": "MIT",
+  "homepage": "https://github.com/berenger/ninjiwi",
+  "authors": [
+    {
+      "name": "Berenger VIDAL",
+      "email": "berenger.vidal@hotmail.fr"
+    }
+  ],
+  "require": {
+    "league/climate": "^3.5",
+    "league/commonmark": "^1.5",
+    "league/flysystem": "^1.0",
+    "league/plates": "^3.3",
+    "league/booboo": "^2.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Ninjiwi\\": "src/"
+    }
+  },
+  "require-dev": {
+    "phpstan/phpstan": "^0.12.40"
+  }
+}
