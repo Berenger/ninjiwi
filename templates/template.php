@@ -11,15 +11,20 @@
         <header>
             <div class="header">
                 <div class="title">
-                    <a href="/" title="Ninjiwi PHP">Ninjiwi PHP</a>
+                    <a href="/" title="<?= $this->e($gc['title'])?>"><?= $this->e($gc['title'])?></a>
                 </div>
                 <div class="menu">
-                    <a href="/pages/exemple-page.html" title="Example Page">Example Page</a>
+                    <?php foreach ($gc['menu'] as $text => $link): ?>
+                    <a href="<?= $link ?>" title="<?= $text ?>"><?= $text ?></a>
+                    <?php endforeach; ?>
                 </div>
             </div>
         </header>
-
-    <?=$this->section('content')?>
+        <?=$this->section('content')?>
+        <footer>
+            <div class="footer">
+                <?= $this->e($gc['footer'])?>
+            </div>
+        </footer>
     </body>
-
 </html>
