@@ -1,6 +1,6 @@
 ---
-title: "Example Post"
-date: 2020-06-22T15:17:57+02:00
+title: "Example Post 2"
+date: 2020-07-22T15:17:57+02:00
 categories: ["Exemple"]
 draft: false
 ---
