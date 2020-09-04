@@ -1,5 +1,5 @@
-<?php
-$this->layout('template', ['title' => $title]) ?>
+<?php $this->layout('template', ['title' => $title, 'gc' => $globalConfiguration]) ?>
+
 <main>
     <article>
         <h1><?= $title ?></h1>

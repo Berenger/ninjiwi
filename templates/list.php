@@ -1,4 +1,4 @@
-<?php $this->layout('template', ['title' => $title]) ?>
+<?php $this->layout('template', ['title' => $title, 'gc' => $globalConfiguration]) ?>
 
 <main>
     <?php foreach ($pages as $page): ?>

@@ -1,8 +1,6 @@
 #!/usr/bin/env php
-
 <?php
 require_once('vendor/autoload.php');
-
 
 use Ninjiwi\Util\sanitize;
 use Ninjiwi\Util\ContentParser;
@@ -13,6 +11,9 @@ use League\CommonMark\CommonMarkConverter;
 use League\Flysystem\Adapter\Local;
 use League\Flysystem\Filesystem;
 use League\Plates\Engine;
+
+/** @var array $globalConfiguration */
+include __DIR__ . '/../config/configuration.php';
 
 /**
  * Bootstrap
@@ -69,7 +70,12 @@ foreach ($contents as $content) {
         $pathHtml = $content['dirname'] . '/' . $content['filename'] . '.html';
         $cf = new ContentParser($fsContent->read($content['path']));
         $convertContent = $markConverter->convertToHtml($cf->content);
-        $contentHtml = $templates->render($content['dirname'], ['content' => $convertContent, 'title' => $cf->config['title']]);
+        $contentHtml = $templates->render($content['dirname'], [
+            'globalConfiguration' => $globalConfiguration,
+            'content' => $convertContent,
+            'title' => $cf->config['title']
+        ]);
+
         if ($cf->config['draft'] === false) {
             $resumePage = [
                 'title' => $cf->config['title'],
@@ -95,9 +101,9 @@ foreach ($contents as $content) {
  * Orders Content
  */
 foreach ($categoriesPages as $category => $content)
-usort($categoriesPages[$category], function($a, $b) {
-    return $b['timestamp'] - $a['timestamp'];
-});
+    usort($categoriesPages[$category], function ($a, $b) {
+        return $b['timestamp'] - $a['timestamp'];
+    });
 
 /**
  * Generate pages
@@ -131,6 +137,7 @@ foreach ($categoriesPages as $category => $pages) {
         }
 
         $contentHtml = $templates->render('list', [
+            'globalConfiguration' => $globalConfiguration,
             'pages' => $list,
             'title' => $title,
             'maxPage' => $nbPage,
