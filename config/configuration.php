@@ -1,10 +1,11 @@
 <?php
 
 $globalConfiguration = [
-    'title' => 'Ninjiwi PHP',
-    'menu' => [
-        'Example 1' => '/pages/exemple-page.html',
-        'Example 2' => '/pages/exemple-page.html',
+    'title'    => 'Ninjiwi PHP',
+    'index'    => 'exemple-page-index',
+    'menu'     => [
+        'Blog'      => '/articles-page-1.html',
+        'Example'   => '/pages/exemple-page.html',
     ],
-    'footer' => 'Make with Ninjiwi'
+    'footer'   => 'Make with Ninjiwi'
 ];

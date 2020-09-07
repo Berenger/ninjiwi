@@ -60,11 +60,13 @@ foreach ($contents as $content) {
 }
 
 /**
- * Generate files html
+ * Generate posts
  */
 $progress->advance(25, 'Generate posts');
 $contents = $fsContent->listContents('', true);
 $categoriesPages = [];
+$contentIndex = '';
+
 foreach ($contents as $content) {
     if ($content['extension'] === 'md') {
         $pathHtml = $content['dirname'] . '/' . $content['filename'] . '.html';
@@ -92,7 +94,12 @@ foreach ($contents as $content) {
                 }
             }
 
-            $fsPublic->put($pathHtml, Sanitize::html($contentHtml));
+            if ($content['filename'] == $globalConfiguration['index'])  {
+                $contentIndex = $contentHtml;
+            } else {
+                $fsPublic->put($pathHtml, Sanitize::html($contentHtml));
+            }
+
         }
     }
 }
@@ -126,11 +133,10 @@ foreach ($categoriesPages as $category => $pages) {
             $hasPrev = false;
         }
 
-        if ($k === 0 && $category === 'articles') {
+        if ($k === 0 && $category === 'articles' && empty($globalConfiguration['index'])) {
             $file = 'index.html';
             $hasPrev = false;
         }
-
 
         if ($nbPage === ($k + 1)) {
             $hasNext = false;
@@ -149,6 +155,10 @@ foreach ($categoriesPages as $category => $pages) {
         ]);
         $fsPublic->put($file, Sanitize::html($contentHtml));
     }
+}
+
+if(!empty($contentIndex)) {
+    $fsPublic->put('index.html', Sanitize::html($contentIndex));
 }
 
 /**

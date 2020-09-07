@@ -12,6 +12,7 @@ bin/genrate
 
 ```
 app
+└── config       # Configuration file
 └── content      # Personalized site content
     └── pages    # Page 
     └── posts    # Blog posts
@@ -20,6 +21,20 @@ app
     └── css      # CSS files
     └── js       # JS files
 └── templates    # Site template
+```
+
+## Configuration
+
+```php
+$globalConfiguration = [
+    'title'    => 'Ninjiwi PHP',                  // Title
+    'index'    => 'exemple-page-index',           // Name of the page used as index
+    'menu'     => [                               // Header menu
+        'Blog'      => '/articles-page-1.html',    
+        'Example 1' => '/pages/exemple-page.html',  
+    ],
+    'footer'   => 'Make with Ninjiwi'             // Footer content
+];
 ```
 
 *Just a small project*
