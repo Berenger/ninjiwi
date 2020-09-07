@@ -3,7 +3,7 @@
 require_once('vendor/autoload.php');
 
 use Ninjiwi\Util\sanitize;
-use Ninjiwi\Util\ContentParser;
+use Ninjiwi\Content\Content;
 use League\BooBoo\Formatter\CommandLineFormatter;
 use League\BooBoo\BooBoo;
 use League\CLImate\CLImate;
@@ -62,7 +62,7 @@ foreach ($contents as $content) {
 /**
  * Generate posts
  */
-$progress->advance(25, 'Generate posts');
+$progress->advance(25, 'Generate Content');
 $contents = $fsContent->listContents('', true);
 $categoriesPages = [];
 $contentIndex = '';
@@ -70,7 +70,7 @@ $contentIndex = '';
 foreach ($contents as $content) {
     if ($content['extension'] === 'md') {
         $pathHtml = $content['dirname'] . '/' . $content['filename'] . '.html';
-        $cf = new ContentParser($fsContent->read($content['path']));
+        $cf = new Content($fsContent->read($content['path']));
         $convertContent = $markConverter->convertToHtml($cf->content);
         $contentHtml = $templates->render($content['dirname'], [
             'globalConfiguration' => $globalConfiguration,

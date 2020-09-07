@@ -1,10 +1,11 @@
 <?php
 
-namespace Ninjiwi\Util;
+namespace Ninjiwi\Content;
 
-class ContentParser
+use Ninjiwi\Util\Spyc;
+
+class Content
 {
-
     /**
      * @var array
      */
@@ -25,11 +26,16 @@ class ContentParser
      */
     public function __construct(string $content)
     {
+        $this->loadContent($content);
+    }
+
+    private function loadContent(string $content)
+    {
         $tmp = explode('---', $content);
         $more = explode('<!--more-->', $tmp[2]);
 
         $this->config = Spyc::YAMLLoadString($tmp[1]);
-        $this->content = $tmp[2];
-        $this->more = current($more);
+        $this->content = trim($tmp[2]);
+        $this->more = trim(current($more));
     }
 }

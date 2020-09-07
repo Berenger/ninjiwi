@@ -37,4 +37,10 @@ $globalConfiguration = [
 ];
 ```
 
+## Run Test
+
+```
+./vendor/bin/phpunit tests
+```
+
 *Just a small project*
