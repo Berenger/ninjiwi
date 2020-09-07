@@ -22,4 +22,9 @@ app
 └── templates    # Site template
 ```
 
+## Run Test
+
+```
+./vendor/bin/phpunit tests --coverage-html
+```
 *Just a small project*

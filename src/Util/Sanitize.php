@@ -23,7 +23,7 @@ class Sanitize
             ''
         ];
 
-        return preg_replace($search, $replace, $html);
+        return trim(preg_replace($search, $replace, $html));
     }
 
     /**
